@@ -1,39 +1,70 @@
-import SelectQuantityButton from "@/components/custom/select-quantity";
-import { Button } from "@/components/ui/button";
+interface Promotion {
+  newPrice: number;
+  startDate: string;
+  endDate: string;
+}
+
+interface Variation {
+  name: string;
+  price: number;
+  stock: number;
+  inPromotion: boolean;
+  promotion?: Promotion;
+}
 
 interface Props {
-  url_image: string
-  name: string
+  url_image: string;
+  name: string;
+  description: string;
+  variations: Variation[];
 }
 
 export default function ProductCard({
   url_image,
-  name
+  name,
+  description,
+  variations,
 }: Props) {
   return (
-    <div className="w-[16rem] min-h-[32rem] h-auto bg-white rounded-md shadow-md p-4 flex flex-col justify-start gap-4">
+    <div className="w-max h-auto bg-white rounded-md shadow-md p-4 flex flex-row justify-start gap-4">
       <img 
         src={url_image}
         alt="product"
-        className="w-full h-[15rem] object-cover rounded-md mb-4" 
+        className="w-[16rem] h-[16rem] object-cover rounded-md mb-4" 
       />
 
       <div className="flex-1 text-sm justify-between">
         <h2 className="text-lg font-semibold mb-2">{name}</h2>
 
         <p className="text-xs font-normal text-zinc-500 mb-2">
-          Mussum Ipsum, cacilds vidis litro abertis.  Quem num gosta di mim que vai caçá sua turmis! Bota 1 metro de cachacis aí pra
+          {description}
         </p>
 
-        <p className="mb-1 font-bold">R$ 99,99</p>
-      </div>
+        <div className="flex flex-col gap-2">
+          {variations.map((variation, idx) => (
+            <div key={idx} className="flex flex-col">
+              <p className="font-semibold">{variation.name}</p>
 
-      <div className="w-full flex flex-row justify-between items-center">
-        <Button size="custom" className="py-1 px-4 bg-[#1e4646] hover:bg-[#2a6161] text-xs font-normal">
-          Add to Cart
-        </Button>
+              {variation.inPromotion && variation.promotion ? (
+                <div>
+                  <p className="text-sm line-through text-red-500">
+                    Preço: R$ {variation.price.toFixed(2)}
+                  </p>
+                  <p className="text-sm font-bold text-green-500">
+                    Promoção: R$ {variation.promotion.newPrice.toFixed(2)}
+                  </p>
+                  <p className="text-xs text-zinc-500">
+                    Promoção válida de {new Date(variation.promotion.startDate).toLocaleDateString()} até {new Date(variation.promotion.endDate).toLocaleDateString()}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm">Preço: R$ {variation.price.toFixed(2)}</p>
+              )}
 
-        <SelectQuantityButton />
+              <p className="text-sm">Em estoque: {variation.stock} un</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
