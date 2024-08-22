@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
-import "./globals.css";
+
+import "@/css/globals.css";
 
 const roboto = Roboto({ 
   subsets: ["latin"],
@@ -18,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="bg-zinc-200">
       <body className={roboto.className}>{children}</body>
     </html>
   );

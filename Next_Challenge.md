@@ -11,23 +11,24 @@ O projeto deve ser hospedado na plataforma Vercel, e o código-fonte deve estar 
 **Código**: Deve ser escrito em inglês, e os commits também devem seguir um padrão (imperativo, primeira letra maiúscula).
 
 **Catálogo de Produtos**:  
-- A Primeira Tela (Home) deve exibir uma lista dos produtos, sua foto principal, nome, preços, nome das variações do produto, e suas respectivas quantidades em estoque.  
+- A Primeira Tela (Home) deve exibir uma lista dos produtos, sua foto principal, nome, preços, nome das variações do produto, e suas respectivas quantidades em estoque.
+
 - A Segunda Tela deve ser um formulário de cadastro de um novo produto. O produto deve ter nome, descrição, nome do fornecedor e variações (o produto deve ter uma ou mais variações).
 
 ### Variação:
-- Código de barras: opcional, texto.  
-- SKU: opcional, texto.  
-- Nome da variação: nome curto, normalmente é uma característica como peso, cor, ou tamanho.  
-- Descrição: opcional, texto.  
-- Quantidade em estoque: número.  
-- Preço: número (este campo deve ter uma máscara de preço).  
-- inPromotion: booleano.  
-- Promoção:
-  - Novo preço: número.  
-  - Data de início: data.  
-  - Data de término: data.
-- Fotos: o produto pode ter uma ou mais fotos (obrigatório).  
-- Foto principal: uma foto.
+[x] - Código de barras: opcional, texto.
+[x] - SKU: opcional, texto.  
+[x] - Nome da variação: nome curto, normalmente é uma característica como peso, cor, ou tamanho.  
+[x] - Descrição: opcional, texto.  
+[x] - Quantidade em estoque: número.  
+[x] - Preço: número (este campo deve ter uma máscara de preço).  
+[x] - inPromotion: booleano.  
+[] - Promoção:
+[]   - Novo preço: número.  
+[]   - Data de início: data.  
+[]   - Data de término: data.
+[] - Fotos: o produto pode ter uma ou mais fotos (obrigatório).  
+[] - Foto principal: uma foto.
 
 **Design**:  
 A organização e estrutura da interface ficam a critério do desenvolvedor, mas a facilidade de uso e clareza são fatores importantes na avaliação.
