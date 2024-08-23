@@ -42,20 +42,20 @@ export default function ProductCard({
               {variation.inPromotion && variation.promotion ? (
                 <div>
                   <p className="text-sm line-through text-red-500">
-                    Preço: R$ {variation.price.toFixed(2)}
+                    Price: R$ {variation.price.toFixed(2)}
                   </p>
                   <p className="text-sm font-bold text-green-500">
-                    Promoção: R$ {(variation.promotion.newPrice ?? 0).toFixed(2)}
+                    Promotion: R$ {(variation.promotion.newPrice ?? 0).toFixed(2)}
                   </p>
                   <p className="text-xs text-zinc-500">
-                    Promoção válida de {new Date(variation.promotion.startDate!).toLocaleDateString()} até {new Date(variation.promotion.endDate!).toLocaleDateString()}
+                    Promotion valid from {new Date(variation.promotion.startDate!).toLocaleDateString()} to {new Date(variation.promotion.endDate!).toLocaleDateString()}
                   </p>
                 </div>
               ) : (
-                <p className="text-sm">Preço: R$ {variation.price.toFixed(2)}</p>
+                <p className="text-sm">Price: R$ {variation.price.toFixed(2)}</p>
               )}
 
-              <p className="text-sm">Em estoque: {variation.stock} un</p>
+              <p className="text-sm">In stock: {variation.stock} un</p>
             </div>
           ))}
         </div>
