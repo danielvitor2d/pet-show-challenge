@@ -141,6 +141,14 @@ export default function ProductForm() {
 
   return (
     <form className="flex flex-col gap-6 max-w-4xl mx-auto p-6 shadow-md bg-white rounded-md" onSubmit={handleSubmit(onSubmit)}>
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="w-max px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+      >
+        {'Go Back'}
+      </button>
+
       <h1 className="text-2xl font-bold mb-4 text-center">{'Register product'}</h1>
 
       <div className="flex flex-col gap-4">
