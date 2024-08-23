@@ -341,7 +341,6 @@ export default function ProductForm() {
                   </div>
                 )}
               />
-
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -357,15 +356,30 @@ export default function ProductForm() {
 
             {watchVariations[index]?.inPromotion && (
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="font-medium">New Price</label>
-                  <input
-                    type="number"
-                    {...register(`variations.${index}.promotion.newPrice` as const, { valueAsNumber: true })}
-                    placeholder="New Price"
-                    className="border p-3 rounded-md w-full"
-                  />
-                </div>
+                <Controller
+                  name={`variations.${index}.promotion.newPrice`}
+                  control={control}
+                  render={({ field: { onChange, value, ...fieldProps } }) => (
+                    <div>
+                      <label className="font-medium">Price</label>
+                      <input
+                        type="text"
+                        value={formatPrice(value?.toString() || '')}
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\D/g, '');
+                          const numericValue = parseFloat(rawValue) / 100;
+                          onChange(isNaN(numericValue) ? '' : numericValue);
+                        }}
+                        placeholder="New Price"
+                        className="border p-3 rounded-md w-full"
+                        {...fieldProps}
+                      />
+                      {errors.variations?.[index]?.price && (
+                        <p className="text-red-500 text-sm mt-1">{errors.variations[index]?.promotion?.newPrice?.message}</p>
+                      )}
+                    </div>
+                  )}
+                />
 
                 <div>
                   <label className="font-medium">Start Date</label>
