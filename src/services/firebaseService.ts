@@ -1,12 +1,14 @@
 import { firebaseApp } from "@/libs/firebase-config";
 import { Product } from "@/types/product";
-import { get, getDatabase, push, ref, set } from "firebase/database";
+import { ref as databaseRef, get, getDatabase, push, set } from "firebase/database";
+import { getDownloadURL, getStorage, ref as storageRef, uploadBytes } from "firebase/storage";
 
 const db = getDatabase(firebaseApp);
+const storage = getStorage(firebaseApp);
 
 export const fetchProducts = async () => {
-  const productsRef = ref(db, 'products');
-  const snapshot = await get(productsRef);
+  const ref = databaseRef(db, 'products');
+  const snapshot = await get(ref);
 
   if (snapshot.exists()) {
     const productsData = snapshot.val();
@@ -19,11 +21,35 @@ export const fetchProducts = async () => {
 
 export const registerProduct = async (product: Product) => {
   try {
-    const productsRef = ref(db, "products");
-    const newProductRef = push(productsRef);
+    const ref = databaseRef(db, "products");
+    const newProductRef = push(ref);
     await set(newProductRef, product);
   } catch (error) {
     console.error("Error: ", error);
     throw error
+  }
+};
+
+export const uploadImage = async (file: File, folder: string): Promise<string> => {
+  try {
+    const ref = storageRef(storage, `${folder}/${file.name}`);
+    await uploadBytes(ref, file);
+    const url = await getDownloadURL(ref);
+    return url;
+  } catch (error) {
+    console.error("Erro ao fazer upload da imagem: ", error);
+    throw error;
+  }
+};
+
+// Função para obter o URL da imagem
+export const getImageUrl = async (folder: string, fileName: string): Promise<string> => {
+  try {
+    const ref = storageRef(storage, `${folder}/${fileName}`);
+    const url = await getDownloadURL(ref);
+    return url;
+  } catch (error) {
+    console.error("Erro ao obter o URL da imagem: ", error);
+    throw error;
   }
 };

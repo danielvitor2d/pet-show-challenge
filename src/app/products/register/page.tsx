@@ -2,7 +2,8 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { Paths } from "@/constants/paths";
-import { registerProduct } from "@/services/firebaseService";
+import { registerProduct, uploadImage } from "@/services/firebaseService";
+import { Product } from "@/types/product";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -26,6 +27,8 @@ const productSchema = z.object({
         startDate: z.string().optional(),
         endDate: z.string().optional(),
       }).optional(),
+      mainImage: z.any(),
+      secondaryImages: z.any(),
     })
   ).min(1, "There must be at least one variation."),
 });
@@ -55,9 +58,48 @@ export default function ProductForm() {
     name: "variations",
   }) || [];
 
-  const onSubmit = (data: ProductFormValues) => {
+  const onSubmit = async (data: ProductFormValues) => {
     try {
-      registerProduct(data)
+      let updatedData: Product = {
+        name: data.name,
+        supplier: data.supplier,
+        description: data.description,
+        variations: data.variations.map((variation) => ({
+          name: variation.name,
+          stock: variation.stock,
+          price: variation.price,
+          inPromotion: variation.inPromotion,
+          description: variation.description,
+          barcode: variation.barcode,
+          sku: variation.sku,
+          promotion: variation.promotion,
+          mainImage: '',
+          secondaryImages: []
+        }))
+      }
+
+      for (const idx in data.variations) {
+        const variation = data.variations[idx]
+
+        let mainImageUrl = '';
+
+        if (variation.mainImage) {
+          mainImageUrl = await uploadImage(variation.mainImage, 'main-images');
+        }
+  
+        const secondaryImageUrls: string[] = [];
+        if (variation.secondaryImages) {
+          for (const file of variation.secondaryImages) {
+            const url = await uploadImage(file, 'secondary-images');
+            secondaryImageUrls.push(url);
+          }
+        }
+
+        updatedData.variations[idx].mainImage = mainImageUrl
+        updatedData.variations[idx].secondaryImages = secondaryImageUrls
+      }
+
+      registerProduct(updatedData)
 
       toast({
         title: "Registration",
@@ -74,8 +116,10 @@ export default function ProductForm() {
     }
   };
 
+  console.log(errors)
+
   return (
-    <form className="flex flex-col gap-6 max-w-4xl mx-auto p-6 bg-zinc-200 shadow-md rounded-md" onSubmit={handleSubmit(onSubmit)}>
+    <form className="flex flex-col gap-6 max-w-4xl mx-auto p-6 shadow-md bg-white rounded-md" onSubmit={handleSubmit(onSubmit)}>
       <h1 className="text-2xl font-bold mb-4 text-center">{'Register product'}</h1>
 
       <div className="flex flex-col gap-4">
@@ -85,7 +129,7 @@ export default function ProductForm() {
             type="text"
             {...register("name")}
             placeholder="Product name"
-            className="border p-3 rounded-md w-full bg-zinc-200"
+            className="border p-3 rounded-md w-full "
           />
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
         </div>
@@ -95,7 +139,7 @@ export default function ProductForm() {
           <textarea
             {...register("description")}
             placeholder="Description do Produto"
-            className="border p-3 rounded-md w-full h-24 resize-none bg-zinc-200"
+            className="border p-3 rounded-md w-full h-24 resize-none "
           />
           {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
         </div>
@@ -106,7 +150,7 @@ export default function ProductForm() {
             type="text"
             {...register("supplier")}
             placeholder="Supplier name"
-            className="border p-3 rounded-md w-full bg-zinc-200"
+            className="border p-3 rounded-md w-full "
           />
           {errors.supplier && <p className="text-red-500 text-sm mt-1">{errors.supplier.message}</p>}
         </div>
@@ -116,6 +160,31 @@ export default function ProductForm() {
         <h2 className="text-xl font-semibold mb-4">Variations</h2>
         {fields.map((item, index) => (
           <div key={item.id} className="flex flex-col gap-4 border p-4 rounded-md mb-6">
+            <div className="flex flex-row gap-4 items-center">
+              <label htmlFor="mainImage">Main image</label>
+
+              <input
+                type="file"
+                id="mainImage"
+                accept="image/*"
+                {...register(`variations.${index}.mainImage` as const)}
+                className="border p-2"
+              />
+            </div>
+
+            <div className="flex flex-row gap-4 items-center">
+              <label htmlFor="secondaryImages">Secondary image</label>
+
+              <input
+                type="file"
+                id="secondaryImages"
+                accept="image/*"
+                multiple
+                {...register(`variations.${index}.secondaryImages` as const)}
+                className="border p-2"
+              />
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="font-medium">Barcode</label>
