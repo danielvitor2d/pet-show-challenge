@@ -11,13 +11,13 @@ export const productSchema = z.object({
       name: z.string().min(1, "Variation name is required"),
       description: z.string().optional(),
       stock: z.number().min(0, "Quantity in stock must be positive"),
-      price: z.number().min(0, "Price must be positive"),
+      price: z.number().min(0, "Price must be positive."),
       inPromotion: z.boolean(),
       promotion: z.object({
         newPrice: z.number().min(0, "New price must be positive").optional(),
         startDate: z.string().optional(),
         endDate: z.string().optional(),
-      }).optional(),
+      }).optional().nullable(),
       mainImage: z.any(),
       secondaryImages: z.any(),
     })

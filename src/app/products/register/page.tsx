@@ -1,16 +1,18 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useRef } from "react";
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
+import * as z from "zod";
+
 import { useToast } from "@/components/ui/use-toast";
 import { Paths } from "@/constants/paths";
 import { productSchema } from "@/schemas/product-schema";
 import { registerProduct, uploadImage } from "@/services/firebaseService";
 import { Product } from "@/types/product";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useRef } from "react";
-import { useFieldArray, useForm, useWatch } from "react-hook-form";
-import * as z from "zod";
+import { formatPrice } from "@/utils/format-price";
 import FilePreview from "./components/file-preview";
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -51,9 +53,11 @@ export default function ProductForm() {
     name: "variations",
   }) || [];
 
-  const { mutate, isPending } = useMutation<{}, {}, Product>({
+  const { mutate } = useMutation<{}, {}, Product>({
     mutationKey: ['register-product'],
-    mutationFn: registerProduct,
+    mutationFn: (val) => {
+      return registerProduct(val)
+    },
     onSuccess: () => {
       toast({
         title: "Registration",
@@ -85,7 +89,7 @@ export default function ProductForm() {
         description: variation.description,
         barcode: variation.barcode,
         sku: variation.sku,
-        promotion: variation.promotion,
+        promotion: variation.promotion ?? null,
         mainImage: '',
         secondaryImages: []
       }))
@@ -313,18 +317,31 @@ export default function ProductForm() {
                 )}
               </div>
 
-              <div>
-                <label className="font-medium">Price</label>
-                <input
-                  type="number"
-                  {...register(`variations.${index}.price` as const, { valueAsNumber: true })}
-                  placeholder="Price"
-                  className="border p-3 rounded-md w-full"
-                />
-                {errors.variations?.[index]?.price && (
-                  <p className="text-red-500 text-sm mt-1">{errors.variations[index]?.price?.message}</p>
+              <Controller
+                name={`variations.${index}.price`}
+                control={control}
+                render={({ field: { onChange, value, ...fieldProps } }) => (
+                  <div>
+                    <label className="font-medium">Price</label>
+                    <input
+                      type="text"
+                      value={formatPrice(value?.toString() || '')}
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/\D/g, '');
+                        const numericValue = parseFloat(rawValue) / 100;
+                        onChange(isNaN(numericValue) ? '' : numericValue);
+                      }}
+                      placeholder="Price"
+                      className="border p-3 rounded-md w-full"
+                      {...fieldProps}
+                    />
+                    {errors.variations?.[index]?.price && (
+                      <p className="text-red-500 text-sm mt-1">{errors.variations[index]?.price?.message}</p>
+                    )}
+                  </div>
                 )}
-              </div>
+              />
+
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -408,8 +425,7 @@ export default function ProductForm() {
 
       <button
         type="submit"
-        disabled={isPending}
-        className="bg-green-500 text-white p-4 rounded-md mt-6 hover:bg-green-600 transition-colors"
+        className="bg-green-500 text-white p-4 rounded-md mt-6 hover:bg-green-600 transition-colors flex flex-row gap-2 items-center justify-center"
       >
         Register Product
       </button>

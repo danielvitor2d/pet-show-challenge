@@ -11,7 +11,7 @@ export type Variation = {
     newPrice?: number;
     startDate?: string;
     endDate?: string;
-  },
+  } | null,
   mainImage: string;
   secondaryImages: string[];
 }
