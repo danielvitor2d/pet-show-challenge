@@ -1,6 +1,6 @@
 export const Paths = {
   Products: {
-    List: "products",
-    Register: "products/add"
+    List: "/products",
+    Register: "/products/register"
   }
 }

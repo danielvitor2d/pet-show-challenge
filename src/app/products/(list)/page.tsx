@@ -1,5 +1,6 @@
 "use client"
 
+import { Paths } from "@/constants/paths";
 import { constants } from "@/constants/react-query-constants";
 import { fetchProducts } from "@/services/firebaseService";
 import { Product } from "@/types/product";
@@ -23,29 +24,29 @@ export default function Page() {
     );
   }
 
-  if (isError) {
+  if (isError || !data) {
     return (
       <section className="min-w-[800px] min-h-[800px] flex items-center justify-center">
-        <p>Failed to load products. Please try again later.</p>
+        <p>{'Failed to load products. Please try again later.'}</p>
       </section>
     );
   }
 
   return (
     <section className="min-w-[800px] min-h-[800px] flex flex-col gap-20 items-center justify-start">
-      <h1>PetShow - Listing Products</h1>
+      <h1 className="text-xl font-semibold">PetShow</h1>
 
       <div className="flex flex-col gap-4 items-start">
         <button
           type="button"
-          onClick={() => router.push('/products/register')}
+          onClick={() => router.push(Paths.Products.Register)}
           className="w-auto px-4 bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition-colors"
         >
           {'Register Product'}
         </button>
 
         <div className="flex flex-col gap-4">
-          {data?.map(({ name, description, variations, supplier }, idx) => (
+          {data.map(({ name, description, variations, supplier }, idx) => (
             <ProductCard 
               key={idx} 
               name={name} 
