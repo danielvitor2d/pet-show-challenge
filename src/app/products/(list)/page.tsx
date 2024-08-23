@@ -2,6 +2,7 @@
 
 import { Paths } from "@/constants/paths";
 import { constants } from "@/constants/react-query-constants";
+import NoData from "@/core/components/no-data";
 import { fetchProducts } from "@/services/firebaseService";
 import { Product } from "@/types/product";
 import { useQuery } from "@tanstack/react-query";
@@ -34,9 +35,9 @@ export default function Page() {
 
   return (
     <section className="min-w-[800px] min-h-[800px] flex flex-col gap-20 items-center justify-start">
-      <h1 className="text-xl font-semibold">PetShow</h1>
+      <h1 className="text-3xl font-semibold">PetShow</h1>
 
-      <div className="flex flex-col gap-4 items-start">
+      <div className="flex flex-col gap-4 items-center">
         <button
           type="button"
           onClick={() => router.push(Paths.Products.Register)}
@@ -45,8 +46,8 @@ export default function Page() {
           {'Register Product'}
         </button>
 
-        <div className="flex flex-col gap-4">
-          {data.map(({ name, description, variations, supplier }, idx) => (
+        <div className="flex flex-col gap-4 items-center justify-center">
+          {data.map(({ name, description, variations, supplier, id }, idx) => (
             <ProductCard 
               key={idx} 
               name={name} 
@@ -54,8 +55,14 @@ export default function Page() {
               description={description ?? ""}
               supplier={supplier}
               variations={variations}
+              productId={id!}
             />
           ))}
+          {
+            (!data || data.length === 0) && (
+              <NoData />
+            )
+          }
         </div>
       </div>
     </section>

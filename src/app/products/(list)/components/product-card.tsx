@@ -1,7 +1,11 @@
+import { constants } from "@/constants/react-query-constants";
+import { removeProduct } from "@/services/firebaseService";
 import { Variation } from "@/types/product";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 interface Props {
+  productId: string;
   url_image: string;
   name: string;
   description: string;
@@ -10,15 +14,34 @@ interface Props {
 }
 
 export default function ProductCard({
+  productId,
   name,
   description,
   supplier,
   variations,
 }: Props) {
   const [selectedVariation, setSelectedVariation] = useState<Variation>(variations[0]);
+  const queryClient = useQueryClient();
+
+  const { mutate } = useMutation({
+    mutationFn: () => removeProduct(productId, { name, description, supplier, variations }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [constants.products.listing]
+      });
+      console.log(`Product ${productId} deleted successfully.`);
+    },
+    onError: (error) => {
+      console.error("Error removing product: ", error);
+    },
+  });
 
   const handleVariationChange = (variation: Variation) => {
     setSelectedVariation(variation);
+  };
+
+  const handleDelete = () => {
+    mutate();
   };
 
   return (
@@ -30,15 +53,25 @@ export default function ProductCard({
       />
 
       <div className="flex-1 text-sm justify-between">
-        <h2 className="text-lg font-semibold mb-2">{name}</h2>
+        <div className="flex justify-between items-start">
+          <div>
+            <h2 className="text-lg font-semibold mb-2">{name}</h2>
 
-        <p className="text-xs font-semibold text-zinc-800 mb-2">
-          {`Supplier: ${supplier}`}
-        </p>
+            <p className="text-xs font-semibold text-zinc-800 mb-2">
+              {`Supplier: ${supplier}`}
+            </p>
 
-        <p className="text-xs font-normal text-zinc-500 mb-2">
-          {`Description: ${description}`}
-        </p>
+            <p className="text-xs font-normal text-zinc-500 mb-2">
+              {`Description: ${description}`}
+            </p>
+          </div>
+          <button
+            onClick={handleDelete}
+            className="text-red-500 hover:text-red-700 transition-colors"
+          >
+            Delete
+          </button>
+        </div>
 
         <div className="flex flex-col gap-2">
           <div>

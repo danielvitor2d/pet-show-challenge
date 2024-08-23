@@ -17,6 +17,7 @@ export type Variation = {
 }
 
 export type Product = {
+  id?: string;
   name: string;
   description?: string;
   supplier: string;
