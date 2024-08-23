@@ -1,6 +1,7 @@
 "use client";
 
 import { useToast } from "@/components/ui/use-toast";
+import { Paths } from "@/constants/paths";
 import { registerProduct } from "@/services/firebaseService";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -8,25 +9,25 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
 const productSchema = z.object({
-  name: z.string().min(1, "Nome do produto é obrigatório"),
+  name: z.string().min(1, "Product name is required"),
   description: z.string().optional(),
-  supplier: z.string().min(1, "Nome do fornecedor é obrigatório"),
+  supplier: z.string().min(1, "Supplier name is required"),
   variations: z.array(
     z.object({
       barcode: z.string().optional(),
       sku: z.string().optional(),
-      name: z.string().min(1, "Nome da variação é obrigatório"),
+      name: z.string().min(1, "Variation name is required"),
       description: z.string().optional(),
-      stock: z.number().min(0, "Quantidade em estoque deve ser positiva"),
-      price: z.number().min(0, "Preço deve ser positivo"),
+      stock: z.number().min(0, "Quantity in stock must be positive"),
+      price: z.number().min(0, "Price must be positive"),
       inPromotion: z.boolean(),
       promotion: z.object({
-        newPrice: z.number().min(0, "Novo preço deve ser positivo").optional(),
+        newPrice: z.number().min(0, "New price must be positive").optional(),
         startDate: z.string().optional(),
         endDate: z.string().optional(),
       }).optional(),
     })
-  ),
+  ).min(1, "There must be at least one variation."),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -63,7 +64,7 @@ export default function ProductForm() {
         description: "Product has been registered!",
       })
 
-      router.replace('/products')
+      router.replace(Paths.Products.List)
     } catch (error) {
 
       toast({
@@ -75,36 +76,36 @@ export default function ProductForm() {
 
   return (
     <form className="flex flex-col gap-6 max-w-4xl mx-auto p-6 bg-zinc-200 shadow-md rounded-md" onSubmit={handleSubmit(onSubmit)}>
-      <h1 className="text-2xl font-bold mb-4 text-center">Cadastrar Produto</h1>
+      <h1 className="text-2xl font-bold mb-4 text-center">{'Register product'}</h1>
 
       <div className="flex flex-col gap-4">
         <div>
-          <label className="font-medium">Nome do Produto</label>
+          <label className="font-medium">{'Product name'}</label>
           <input
             type="text"
             {...register("name")}
-            placeholder="Nome do Produto"
+            placeholder="Product name"
             className="border p-3 rounded-md w-full bg-zinc-200"
           />
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
         </div>
 
         <div>
-          <label className="font-medium">Descrição</label>
+          <label className="font-medium">Description</label>
           <textarea
             {...register("description")}
-            placeholder="Descrição do Produto"
+            placeholder="Description do Produto"
             className="border p-3 rounded-md w-full h-24 resize-none bg-zinc-200"
           />
           {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
         </div>
 
         <div>
-          <label className="font-medium">Nome do Fornecedor</label>
+          <label className="font-medium">Supplier name</label>
           <input
             type="text"
             {...register("supplier")}
-            placeholder="Nome do Fornecedor"
+            placeholder="Supplier name"
             className="border p-3 rounded-md w-full bg-zinc-200"
           />
           {errors.supplier && <p className="text-red-500 text-sm mt-1">{errors.supplier.message}</p>}
@@ -112,16 +113,16 @@ export default function ProductForm() {
       </div>
 
       <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-4">Variações</h2>
+        <h2 className="text-xl font-semibold mb-4">Variations</h2>
         {fields.map((item, index) => (
           <div key={item.id} className="flex flex-col gap-4 border p-4 rounded-md mb-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="font-medium">Código de Barras</label>
+                <label className="font-medium">Barcode</label>
                 <input
                   type="text"
                   {...register(`variations.${index}.barcode` as const)}
-                  placeholder="Código de Barras"
+                  placeholder="Barcode"
                   className="border p-3 rounded-md w-full"
                 />
                 {errors.variations?.[index]?.barcode && (
@@ -145,11 +146,11 @@ export default function ProductForm() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="font-medium">Nome da Variação</label>
+                <label className="font-medium">Variation name</label>
                 <input
                   type="text"
                   {...register(`variations.${index}.name` as const)}
-                  placeholder="Nome da Variação"
+                  placeholder="Variation name"
                   className="border p-3 rounded-md w-full"
                 />
                 {errors.variations?.[index]?.name && (
@@ -158,11 +159,11 @@ export default function ProductForm() {
               </div>
 
               <div>
-                <label className="font-medium">Descrição</label>
+                <label className="font-medium">Description</label>
                 <input
                   type="text"
                   {...register(`variations.${index}.description` as const)}
-                  placeholder="Descrição da Variação"
+                  placeholder="Description da Variação"
                   className="border p-3 rounded-md w-full"
                 />
                 {errors.variations?.[index]?.description && (
@@ -173,11 +174,11 @@ export default function ProductForm() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="font-medium">Quantidade em Estoque</label>
+                <label className="font-medium">Quantity in stock</label>
                 <input
                   type="number"
                   {...register(`variations.${index}.stock` as const, { valueAsNumber: true })}
-                  placeholder="Quantidade em Estoque"
+                  placeholder="Quantity in stock"
                   className="border p-3 rounded-md w-full"
                 />
                 {errors.variations?.[index]?.stock && (
@@ -186,11 +187,11 @@ export default function ProductForm() {
               </div>
 
               <div>
-                <label className="font-medium">Preço</label>
+                <label className="font-medium">Price</label>
                 <input
                   type="number"
                   {...register(`variations.${index}.price` as const, { valueAsNumber: true })}
-                  placeholder="Preço"
+                  placeholder="Price"
                   className="border p-3 rounded-md w-full"
                 />
                 {errors.variations?.[index]?.price && (
@@ -206,7 +207,7 @@ export default function ProductForm() {
                   {...register(`variations.${index}.inPromotion` as const)}
                   className="h-5 w-5"
                 />
-                <label className="font-medium">Em Promoção</label>
+                <label className="font-medium">In Promotion</label>
               </div>
             </div>
 
@@ -214,17 +215,17 @@ export default function ProductForm() {
             {watchPromotions[index]?.inPromotion && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="font-medium">Novo Preço</label>
+                  <label className="font-medium">New Price</label>
                   <input
                     type="number"
                     {...register(`variations.${index}.promotion.newPrice` as const, { valueAsNumber: true })}
-                    placeholder="Novo Preço"
+                    placeholder="New Price"
                     className="border p-3 rounded-md w-full"
                   />
                 </div>
 
                 <div>
-                  <label className="font-medium">Data de Início</label>
+                  <label className="font-medium">Start Date</label>
                   <input
                     type="date"
                     {...register(`variations.${index}.promotion.startDate` as const)}
@@ -233,7 +234,7 @@ export default function ProductForm() {
                 </div>
 
                 <div>
-                  <label className="font-medium">Data de Término</label>
+                  <label className="font-medium">End Date</label>
                   <input
                     type="date"
                     {...register(`variations.${index}.promotion.endDate` as const)}
@@ -248,7 +249,7 @@ export default function ProductForm() {
               onClick={() => remove(index)}
               className="self-end mt-2 text-red-600 hover:underline"
             >
-              Remover Variação
+              Remove variation
             </button>
           </div>
         ))}
@@ -273,15 +274,16 @@ export default function ProductForm() {
           }
           className="bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition-colors"
         >
-          Adicionar Variação
+          Register Variation
         </button>
       </div>
+      {errors.variations && <p className="text-red-500 text-sm mt-1">{errors.variations.message}</p>}
 
       <button
         type="submit"
         className="bg-green-500 text-white p-4 rounded-md mt-6 hover:bg-green-600 transition-colors"
       >
-        Cadastrar Produto
+        Register Product
       </button>
     </form>
   );
