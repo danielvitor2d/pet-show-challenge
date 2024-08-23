@@ -2,43 +2,25 @@
 
 import { useToast } from "@/components/ui/use-toast";
 import { Paths } from "@/constants/paths";
+import { productSchema } from "@/schemas/product-schema";
 import { registerProduct, uploadImage } from "@/services/firebaseService";
 import { Product } from "@/types/product";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useRef } from "react";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 import FilePreview from "./components/file-preview";
-
-const productSchema = z.object({
-  name: z.string().min(1, "Product name is required"),
-  description: z.string().optional(),
-  supplier: z.string().min(1, "Supplier name is required"),
-  variations: z.array(
-    z.object({
-      barcode: z.string().optional(),
-      sku: z.string().optional(),
-      name: z.string().min(1, "Variation name is required"),
-      description: z.string().optional(),
-      stock: z.number().min(0, "Quantity in stock must be positive"),
-      price: z.number().min(0, "Price must be positive"),
-      inPromotion: z.boolean(),
-      promotion: z.object({
-        newPrice: z.number().min(0, "New price must be positive").optional(),
-        startDate: z.string().optional(),
-        endDate: z.string().optional(),
-      }).optional(),
-      mainImage: z.any(),
-      secondaryImages: z.any(),
-    })
-  ).min(1, "There must be at least one variation."),
-});
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
 export default function ProductForm() {
   const { toast } = useToast()
   const router = useRouter()
+
+  const mainImageInput = useRef<HTMLInputElement | null>(null);
+  const fileInputs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
   const {
     register,
@@ -69,63 +51,88 @@ export default function ProductForm() {
     name: "variations",
   }) || [];
 
-  const onSubmit = async (data: ProductFormValues) => {
-    try {
-      let updatedData: Product = {
-        name: data.name,
-        supplier: data.supplier,
-        description: data.description,
-        variations: data.variations.map((variation) => ({
-          name: variation.name,
-          stock: variation.stock,
-          price: variation.price,
-          inPromotion: variation.inPromotion,
-          description: variation.description,
-          barcode: variation.barcode,
-          sku: variation.sku,
-          promotion: variation.promotion,
-          mainImage: '',
-          secondaryImages: []
-        }))
-      }
-
-      for (const idx in data.variations) {
-        const variation = data.variations[idx]
-
-        let mainImageUrl = '';
-
-        if (variation.mainImage) {
-          mainImageUrl = await uploadImage(variation.mainImage, 'main-images');
-        }
-  
-        const secondaryImageUrls: string[] = [];
-        if (variation.secondaryImages) {
-          for (const file of variation.secondaryImages) {
-            const url = await uploadImage(file, 'secondary-images');
-            secondaryImageUrls.push(url);
-          }
-        }
-
-        updatedData.variations[idx].mainImage = mainImageUrl
-        updatedData.variations[idx].secondaryImages = secondaryImageUrls
-      }
-
-      registerProduct(updatedData)
-
+  const { mutate, isPending } = useMutation<{}, {}, Product>({
+    mutationKey: ['register-product'],
+    mutationFn: registerProduct,
+    onSuccess: () => {
       toast({
         title: "Registration",
         description: "Product has been registered!",
       })
 
       router.replace(Paths.Products.List)
-    } catch (error) {
-      console.log(error)
+    },
+    onError: (err) => {
+      console.log(err)
 
       toast({
         title: "Registration",
         description: "Product not registered! Please try again later.",
       })
     }
+  })
+
+  const onSubmit = async (data: ProductFormValues) => {
+    let updatedData: Product = {
+      name: data.name,
+      supplier: data.supplier,
+      description: data.description,
+      variations: data.variations.map((variation) => ({
+        name: variation.name,
+        stock: variation.stock,
+        price: variation.price,
+        inPromotion: variation.inPromotion,
+        description: variation.description,
+        barcode: variation.barcode,
+        sku: variation.sku,
+        promotion: variation.promotion,
+        mainImage: '',
+        secondaryImages: []
+      }))
+    }
+
+    for (const idx in data.variations) {
+      const variation = data.variations[idx]
+
+      let mainImageUrl = '';
+
+      if (variation.mainImage) {
+        mainImageUrl = await uploadImage(variation.mainImage, 'main-images');
+      }
+
+      const secondaryImageUrls: string[] = [];
+      if (variation.secondaryImages) {
+        for (const file of variation.secondaryImages) {
+          const url = await uploadImage(file, 'secondary-images');
+          secondaryImageUrls.push(url);
+        }
+      }
+
+      updatedData.variations[idx].mainImage = mainImageUrl
+      updatedData.variations[idx].secondaryImages = secondaryImageUrls
+    }
+
+    mutate(updatedData)
+  };
+
+  const handleFileChange = (index: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files ? Array.from(event.target.files) : [];
+    setValue(`variations.${index}.secondaryImages`, files);
+  };
+
+  const handleRemove = (index: number, fileIndex: number) => {
+    const updatedImages = watch(`variations.${index}.secondaryImages`) || [];
+    const newImages = updatedImages.filter((_: any, idx: number) => idx !== fileIndex);
+    setValue(`variations.${index}.secondaryImages`, newImages);
+  };
+
+  const handleClearInput = (index: number) => {
+    setTimeout(() => {
+      const inputElement = fileInputs.current[index];
+      if (inputElement) {
+        inputElement.value = '';
+      }
+    }, 0);
   };
 
   return (
@@ -168,68 +175,73 @@ export default function ProductForm() {
 
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-4">Variations</h2>
-        
+
         {fields.map((item, index) => (
           <div key={item.id} className="flex flex-col gap-4 border p-4 rounded-md mb-6">
-            {watchVariations[index] &&
-              <>
-                <div className="flex flex-col gap-4">
-                  <h3 className="font-semibold">Main Image</h3>
+            <div className="flex flex-col gap-4">
+              <h3 className="font-semibold">Main Image</h3>
 
-                  <div className="flex flex-row gap-4 items-center">
-                    <input
-                      type="file"
-                      id={`mainImage-${index}`}
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        setValue(`variations.${index}.mainImage`, file);
-                      }}
-                      className="border p-2"
-                    />
-                  </div>
+              <div className="flex flex-row gap-4 items-center">
+                <input
+                  type="file"
+                  id={`mainImage-${index}`}
+                  accept="image/*"
+                  ref={(el) => {
+                    mainImageInput.current = el
+                  }}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    setValue(`variations.${index}.mainImage`, file);
+                  }}
+                  className="border p-2 hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => mainImageInput.current?.click()}
+                  className="border p-2 bg-blue-500 text-white rounded"
+                >
+                  Choose File
+                </button>
+              </div>
 
-                  <FilePreview
-                    files={watch(`variations.${index}.mainImage`)}
-                    onRemove={() => setValue(`variations.${index}.mainImage`, undefined)}
-                  />
-                </div>
+              <FilePreview
+                files={watch(`variations.${index}.mainImage`)}
+                onRemove={() => setValue(`variations.${index}.mainImage`, undefined)}
+              />
+            </div>
 
-                <div className="flex flex-col gap-4">
-                  <h3 className="font-semibold">Secondary Images</h3>
+            <div className="flex flex-col gap-4">
+              <h3 className="font-semibold">Secondary Images</h3>
 
-                  <div className="flex flex-row gap-4 items-center">
-                    <input
-                      type="file"
-                      id={`secondaryImages-${index}`}
-                      accept="image/*"
-                      multiple
-                      onChange={(e) => {
-                        const files = e.target.files ? Array.from(e.target.files) : [];
-                        setValue(`variations.${index}.secondaryImages`, files);
-                      }}
-                      className="border p-2"
-                    />
-                  </div>
+              <div className="flex flex-row gap-4 items-center">
+                <input
+                  type="file"
+                  id={`secondaryImages-${index}`}
+                  accept="image/*"
+                  multiple
+                  ref={(el) => {
+                    fileInputs.current[index] = el
+                  }}
+                  onChange={(e) => {
+                    handleFileChange(index, e)
+                    handleClearInput(index)
+                  }}
+                  className="border p-2 hidden"
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputs.current[index]?.click()}
+                  className="border p-2 bg-blue-500 text-white rounded"
+                >
+                  Choose Files
+                </button>
+              </div>
 
-                  <FilePreview
-                    files={watch(`variations.${index}.secondaryImages`)}
-                    onRemove={(i) => {
-                      const updatedImages = watch(`variations.${index}.secondaryImages`);
-                      if (Array.isArray(updatedImages)) {
-                        setValue(
-                          `variations.${index}.secondaryImages`,
-                          updatedImages.filter((_: any, idx: number) => idx !== i)
-                        );
-                      } else {
-                        console.error("Erro: `secondaryImages` não é um array.");
-                        setValue(`variations.${index}.secondaryImages`, []);
-                      }
-                    }}
-                  />
-                </div>
-              </>
-            }
+              <FilePreview
+                files={watch(`variations.${index}.secondaryImages`)}
+                onRemove={(fileIndex) => handleRemove(index, fileIndex)}
+              />
+            </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -388,13 +400,15 @@ export default function ProductForm() {
           }
           className="bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition-colors"
         >
-          Register Variation
+          Add Variation
         </button>
       </div>
+
       {errors.variations && <p className="text-red-500 text-sm mt-1">{errors.variations.message}</p>}
 
       <button
         type="submit"
+        disabled={isPending}
         className="bg-green-500 text-white p-4 rounded-md mt-6 hover:bg-green-600 transition-colors"
       >
         Register Product

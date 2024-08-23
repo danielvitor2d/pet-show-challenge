@@ -24,6 +24,7 @@ export const registerProduct = async (product: Product) => {
     const ref = databaseRef(db, "products");
     const newProductRef = push(ref);
     await set(newProductRef, product);
+    return {}
   } catch (error) {
     console.error("Error: ", error);
     throw error
@@ -37,19 +38,18 @@ export const uploadImage = async (file: File, folder: string): Promise<string> =
     const url = await getDownloadURL(ref);
     return url;
   } catch (error) {
-    console.error("Erro ao fazer upload da imagem: ", error);
+    console.error("Error uploading image: ", error);
     throw error;
   }
 };
 
-// Função para obter o URL da imagem
 export const getImageUrl = async (folder: string, fileName: string): Promise<string> => {
   try {
     const ref = storageRef(storage, `${folder}/${fileName}`);
     const url = await getDownloadURL(ref);
     return url;
   } catch (error) {
-    console.error("Erro ao obter o URL da imagem: ", error);
+    console.error("Error getting image URL: ", error);
     throw error;
   }
 };
