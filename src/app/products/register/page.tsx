@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
+import FilePreview from "./components/file-preview";
 
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
@@ -43,9 +44,19 @@ export default function ProductForm() {
     register,
     control,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
+    defaultValues: {
+      variations: [
+        {
+          mainImage: [],
+          secondaryImages: [],
+        },
+      ],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -53,7 +64,7 @@ export default function ProductForm() {
     name: "variations",
   });
 
-  const watchPromotions = useWatch({
+  const watchVariations = useWatch({
     control,
     name: "variations",
   }) || [];
@@ -84,7 +95,7 @@ export default function ProductForm() {
         let mainImageUrl = '';
 
         if (variation.mainImage) {
-          mainImageUrl = await uploadImage(variation.mainImage[0], 'main-images');
+          mainImageUrl = await uploadImage(variation.mainImage, 'main-images');
         }
   
         const secondaryImageUrls: string[] = [];
@@ -108,6 +119,7 @@ export default function ProductForm() {
 
       router.replace(Paths.Products.List)
     } catch (error) {
+      console.log(error)
 
       toast({
         title: "Registration",
@@ -115,7 +127,6 @@ export default function ProductForm() {
       })
     }
   };
-
 
   return (
     <form className="flex flex-col gap-6 max-w-4xl mx-auto p-6 shadow-md bg-white rounded-md" onSubmit={handleSubmit(onSubmit)}>
@@ -159,30 +170,65 @@ export default function ProductForm() {
         <h2 className="text-xl font-semibold mb-4">Variations</h2>
         {fields.map((item, index) => (
           <div key={item.id} className="flex flex-col gap-4 border p-4 rounded-md mb-6">
-            <div className="flex flex-row gap-4 items-center">
-              <label htmlFor="mainImage">Main image</label>
+            {watchVariations[index] &&
+              <>
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-semibold">Main Image</h3>
 
-              <input
-                type="file"
-                id="mainImage"
-                accept="image/*"
-                {...register(`variations.${index}.mainImage` as const)}
-                className="border p-2"
-              />
-            </div>
+                  <div className="flex flex-row gap-4 items-center">
+                    <input
+                      type="file"
+                      id={`mainImage-${index}`}
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        setValue(`variations.${index}.mainImage`, file);
+                      }}
+                      className="border p-2"
+                    />
+                  </div>
 
-            <div className="flex flex-row gap-4 items-center">
-              <label htmlFor="secondaryImages">Secondary image</label>
+                  <FilePreview
+                    files={watch(`variations.${index}.mainImage`)}
+                    onRemove={() => setValue(`variations.${index}.mainImage`, undefined)}
+                  />
+                </div>
 
-              <input
-                type="file"
-                id="secondaryImages"
-                accept="image/*"
-                multiple
-                {...register(`variations.${index}.secondaryImages` as const)}
-                className="border p-2"
-              />
-            </div>
+                <div className="flex flex-col gap-4">
+                  <h3 className="font-semibold">Secondary Images</h3>
+
+                  <div className="flex flex-row gap-4 items-center">
+                    <input
+                      type="file"
+                      id={`secondaryImages-${index}`}
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        const files = e.target.files ? Array.from(e.target.files) : [];
+                        setValue(`variations.${index}.secondaryImages`, files);
+                      }}
+                      className="border p-2"
+                    />
+                  </div>
+
+                  <FilePreview
+                    files={watch(`variations.${index}.secondaryImages`)}
+                    onRemove={(i) => {
+                      const updatedImages = watch(`variations.${index}.secondaryImages`);
+                      if (Array.isArray(updatedImages)) {
+                        setValue(
+                          `variations.${index}.secondaryImages`,
+                          updatedImages.filter((_: any, idx: number) => idx !== i)
+                        );
+                      } else {
+                        console.error("Erro: `secondaryImages` não é um array.");
+                        setValue(`variations.${index}.secondaryImages`, []);
+                      }
+                    }}
+                  />
+                </div>
+              </>
+            }
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -279,8 +325,7 @@ export default function ProductForm() {
               </div>
             </div>
 
-            {/* Exibe campos de promoção se o checkbox estiver marcado */}
-            {watchPromotions[index]?.inPromotion && (
+            {watchVariations[index]?.inPromotion && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="font-medium">New Price</label>
