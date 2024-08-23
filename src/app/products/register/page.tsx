@@ -168,6 +168,7 @@ export default function ProductForm() {
 
       <div className="mt-6">
         <h2 className="text-xl font-semibold mb-4">Variations</h2>
+        
         {fields.map((item, index) => (
           <div key={item.id} className="flex flex-col gap-4 border p-4 rounded-md mb-6">
             {watchVariations[index] &&

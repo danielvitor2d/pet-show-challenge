@@ -37,7 +37,7 @@ export default function ProductCard({
         </p>
 
         <p className="text-xs font-normal text-zinc-500 mb-2">
-          {description}
+          {`Description: ${description}`}
         </p>
 
         <div className="flex flex-col gap-2">
