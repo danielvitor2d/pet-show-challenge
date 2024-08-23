@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface FilePreviewProps {
-  files: FileList | File[] | File | null;
+  files: File[] | File | null;
   onRemove: (index: number) => void;
 }
 
@@ -50,9 +50,9 @@ const FileItem: React.FC<FileItemProps> = ({ file, index, onRemove }) => {
 
 const FilePreview: React.FC<FilePreviewProps> = ({ files, onRemove }) => {
   const fileArray = React.useMemo(() => {
-    if (files instanceof FileList) {
-      return Array.from(files);
-    }
+    // if (files instanceof FileList) {
+    //   return Array.from(files);
+    // }
     if (Array.isArray(files)) {
       return files;
     }
