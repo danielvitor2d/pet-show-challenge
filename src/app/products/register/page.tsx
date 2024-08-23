@@ -459,6 +459,10 @@ export default function ProductForm() {
       >
         Register Product
       </button>
+      
+      {
+        isSubmitting && (<p>{'Tentando salvar...'}</p>)
+      }
     </form>
   );
 }
