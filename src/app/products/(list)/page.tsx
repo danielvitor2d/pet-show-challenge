@@ -34,7 +34,7 @@ export default function Page() {
   }
 
   return (
-    <section className="min-w-[800px] min-h-[800px] flex flex-col gap-20 items-center justify-start">
+    <section className="w-max h-max flex flex-col gap-20 items-center justify-center">
       <h1 className="text-3xl font-semibold">PetShow</h1>
 
       <div className="flex flex-col gap-4 items-center">
