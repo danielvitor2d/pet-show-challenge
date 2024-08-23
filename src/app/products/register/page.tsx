@@ -243,7 +243,6 @@ export default function ProductForm() {
               </div>
             )}
 
-            {/* Botão para remover variação */}
             <button
               type="button"
               onClick={() => remove(index)}
@@ -254,7 +253,6 @@ export default function ProductForm() {
           </div>
         ))}
 
-        {/* Botão para adicionar nova variação */}
         <button
           type="button"
           onClick={() =>
@@ -279,7 +277,6 @@ export default function ProductForm() {
         </button>
       </div>
 
-      {/* Botão para submeter o formulário */}
       <button
         type="submit"
         className="bg-green-500 text-white p-4 rounded-md mt-6 hover:bg-green-600 transition-colors"

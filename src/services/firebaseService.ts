@@ -10,7 +10,7 @@ export const fetchProducts = async () => {
 
   if (snapshot.exists()) {
     const productsData = snapshot.val();
-    return Object.values(productsData);
+    return Object.values(productsData) as Product[];
   } else {
     console.log("No products found");
     return [];
