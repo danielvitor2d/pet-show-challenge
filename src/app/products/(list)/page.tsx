@@ -1,6 +1,17 @@
+import { constants } from '@/constants/react-query-constants';
+import { fetchProducts } from '@/services/firebaseService';
+import { useQuery } from "@tanstack/react-query";
 import ProductCard from "./components/product-card";
 
 export default function Page() {
+  const { data } =
+    useQuery({
+      queryKey: [constants.products.listing],
+      queryFn: () => fetchProducts(),
+    })
+
+  console.log(JSON.stringify(data))
+
   return (
     <section className="min-w-[800px] min-h-[800px] flex flex-col gap-20 items-center justify-start">
       <h1>PetShow - Listing Products</h1>
