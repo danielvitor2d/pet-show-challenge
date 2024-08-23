@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
 const productSchema = z.object({
@@ -43,6 +43,11 @@ export default function ProductForm() {
     control,
     name: "variations",
   });
+
+  const watchPromotions = useWatch({
+    control,
+    name: "variations",
+  }) || [];
 
   const onSubmit = (data: ProductFormValues) => {
     console.log(data);
@@ -185,7 +190,8 @@ export default function ProductForm() {
               </div>
             </div>
 
-            {fields[index].inPromotion && (
+            {/* Exibe campos de promoção se o checkbox estiver marcado */}
+            {watchPromotions[index]?.inPromotion && (
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="font-medium">Novo Preço</label>
@@ -217,19 +223,7 @@ export default function ProductForm() {
               </div>
             )}
 
-            <div>
-              <label className="font-medium">Fotos</label>
-              <input
-                type="text"
-                {...register(`variations.${index}.photos` as const)}
-                placeholder="URLs das Fotos"
-                className="border p-3 rounded-md w-full"
-              />
-              {errors.variations?.[index]?.photos && (
-                <p className="text-red-500 text-sm mt-1">{errors.variations[index]?.photos?.message}</p>
-              )}
-            </div>
-
+            {/* Botão para remover variação */}
             <button
               type="button"
               onClick={() => remove(index)}
@@ -240,6 +234,7 @@ export default function ProductForm() {
           </div>
         ))}
 
+        {/* Botão para adicionar nova variação */}
         <button
           type="button"
           onClick={() =>
@@ -265,6 +260,7 @@ export default function ProductForm() {
         </button>
       </div>
 
+      {/* Botão para submeter o formulário */}
       <button
         type="submit"
         className="bg-green-500 text-white p-4 rounded-md mt-6 hover:bg-green-600 transition-colors"

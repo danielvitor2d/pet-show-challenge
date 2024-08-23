@@ -23,10 +23,10 @@ O projeto deve ser hospedado na plataforma Vercel, e o código-fonte deve estar 
 [x] - Quantidade em estoque: número.  
 [x] - Preço: número (este campo deve ter uma máscara de preço).  
 [x] - inPromotion: booleano.  
-[] - Promoção:
-[]   - Novo preço: número.  
-[]   - Data de início: data.  
-[]   - Data de término: data.
+[x] - Promoção:
+[x]   - Novo preço: número.  
+[x]   - Data de início: data.  
+[x]   - Data de término: data.
 [] - Fotos: o produto pode ter uma ou mais fotos (obrigatório).  
 [] - Foto principal: uma foto.
 
