@@ -84,7 +84,7 @@ export default function ProductForm() {
         let mainImageUrl = '';
 
         if (variation.mainImage) {
-          mainImageUrl = await uploadImage(variation.mainImage, 'main-images');
+          mainImageUrl = await uploadImage(variation.mainImage[0], 'main-images');
         }
   
         const secondaryImageUrls: string[] = [];
@@ -116,7 +116,6 @@ export default function ProductForm() {
     }
   };
 
-  console.log(errors)
 
   return (
     <form className="flex flex-col gap-6 max-w-4xl mx-auto p-6 shadow-md bg-white rounded-md" onSubmit={handleSubmit(onSubmit)}>

@@ -27,8 +27,8 @@ O projeto deve ser hospedado na plataforma Vercel, e o código-fonte deve estar 
 [x]   - Novo preço: número.  
 [x]   - Data de início: data.  
 [x]   - Data de término: data.
-[] - Fotos: o produto pode ter uma ou mais fotos (obrigatório).  
-[] - Foto principal: uma foto.
+[x] - Fotos: o produto pode ter uma ou mais fotos (obrigatório).  
+[x] - Foto principal: uma foto.
 
 **Design**:  
 A organização e estrutura da interface ficam a critério do desenvolvedor, mas a facilidade de uso e clareza são fatores importantes na avaliação.

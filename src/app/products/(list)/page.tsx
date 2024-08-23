@@ -50,7 +50,7 @@ export default function Page() {
             <ProductCard 
               key={idx} 
               name={name} 
-              url_image={`https://picsum.photos/seed/${new Date().getTime() * (idx + 1)}/320/640`}
+              url_image={variations[0].mainImage}
               description={description ?? ""}
               supplier={supplier}
               variations={variations}
