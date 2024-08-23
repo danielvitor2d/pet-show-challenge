@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
@@ -23,6 +23,8 @@ export default function ProductForm() {
 
   const mainImageInput = useRef<HTMLInputElement | null>(null);
   const fileInputs = useRef<{ [key: number]: HTMLInputElement | null }>({});
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
@@ -73,10 +75,15 @@ export default function ProductForm() {
         title: "Registration",
         description: "Product not registered! Please try again later.",
       })
+    },
+    onMutate: () => {
+      setIsSubmitting(false)
     }
   })
 
   const onSubmit = async (data: ProductFormValues) => {
+    setIsSubmitting(true)
+
     let updatedData: Product = {
       name: data.name,
       supplier: data.supplier,
@@ -411,7 +418,7 @@ export default function ProductForm() {
 
             <button
               type="button"
-              onClick={() => remove(index)}
+              onClick={() => (fields.length > 1) && remove(index)}
               className="self-end mt-2 text-red-600 hover:underline"
             >
               Remove variation
@@ -447,6 +454,7 @@ export default function ProductForm() {
 
       <button
         type="submit"
+        disabled={isSubmitting}
         className="bg-green-500 text-white p-4 rounded-md mt-6 hover:bg-green-600 transition-colors flex flex-row gap-2 items-center justify-center"
       >
         Register Product
