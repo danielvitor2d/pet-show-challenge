@@ -1,6 +1,9 @@
 "use client";
 
+import { useToast } from "@/components/ui/use-toast";
+import { registerProduct } from "@/services/firebaseService";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import * as z from "zod";
 
@@ -22,7 +25,6 @@ const productSchema = z.object({
         startDate: z.string().optional(),
         endDate: z.string().optional(),
       }).optional(),
-      photos: z.array(z.string().url("Deve ser uma URL válida")).min(1, "Pelo menos uma foto é obrigatória"),
     })
   ),
 });
@@ -30,6 +32,9 @@ const productSchema = z.object({
 type ProductFormValues = z.infer<typeof productSchema>;
 
 export default function ProductForm() {
+  const { toast } = useToast()
+  const router = useRouter()
+
   const {
     register,
     control,
@@ -50,7 +55,22 @@ export default function ProductForm() {
   }) || [];
 
   const onSubmit = (data: ProductFormValues) => {
-    console.log(data);
+    try {
+      registerProduct(data)
+
+      toast({
+        title: "Registration",
+        description: "Product has been registered!",
+      })
+
+      router.replace('/products')
+    } catch (error) {
+
+      toast({
+        title: "Registration",
+        description: "Product not registered! Please try again later.",
+      })
+    }
   };
 
   return (
@@ -251,7 +271,6 @@ export default function ProductForm() {
                 startDate: "",
                 endDate: "",
               },
-              photos: [""],
             })
           }
           className="bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition-colors"

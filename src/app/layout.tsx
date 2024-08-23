@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 
+import { Toaster } from "@/components/ui/toaster";
 import "@/css/globals.css";
 import { Providers } from './providers';
 
@@ -25,6 +26,8 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+
+        <Toaster />
       </body>
     </html>
   );
