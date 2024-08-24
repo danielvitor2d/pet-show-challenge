@@ -51,7 +51,6 @@ export default function Page() {
             <ProductCard 
               key={idx} 
               name={name} 
-              url_image={variations[0].mainImage}
               description={description ?? ""}
               supplier={supplier}
               variations={variations}

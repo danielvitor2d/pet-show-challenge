@@ -1,3 +1,4 @@
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { constants } from "@/constants/react-query-constants";
 import { removeProduct } from "@/services/firebaseService";
 import { Variation } from "@/types/product";
@@ -6,7 +7,6 @@ import { useState } from "react";
 
 interface Props {
   productId: string;
-  url_image: string;
   name: string;
   description: string;
   supplier: string;
@@ -21,6 +21,7 @@ export default function ProductCard({
   variations,
 }: Props) {
   const [selectedVariation, setSelectedVariation] = useState<Variation>(variations[0]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { mutate } = useMutation({
@@ -42,6 +43,7 @@ export default function ProductCard({
 
   const handleDelete = () => {
     mutate();
+    setIsDialogOpen(false);
   };
 
   return (
@@ -66,11 +68,34 @@ export default function ProductCard({
             </p>
           </div>
           <button
-            onClick={handleDelete}
+            onClick={() => setIsDialogOpen(true)}
             className="text-red-500 hover:text-red-700 transition-colors"
           >
             Delete
           </button>
+
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Delete Product</DialogTitle>
+              </DialogHeader>
+              <p>Are you sure you want to delete the product "{name}"?</p>
+              <DialogFooter>
+                <button
+                  onClick={() => setIsDialogOpen(false)}
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="flex flex-col gap-2">
