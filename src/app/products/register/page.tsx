@@ -421,7 +421,7 @@ export default function ProductForm() {
               onClick={() => (fields.length > 1) && remove(index)}
               className="self-end mt-2 text-red-600 hover:underline"
             >
-              Remove variation
+              {'Remove variation'}
             </button>
           </div>
         ))}
@@ -446,7 +446,7 @@ export default function ProductForm() {
           }
           className="bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition-colors"
         >
-          Add Variation
+          {'Add Variation'}
         </button>
       </div>
 
@@ -457,11 +457,11 @@ export default function ProductForm() {
         disabled={isSubmitting}
         className="bg-green-500 text-white p-4 rounded-md mt-6 hover:bg-green-600 transition-colors flex flex-row gap-2 items-center justify-center"
       >
-        Register Product
+        {'Register Product'}
       </button>
       
       {
-        isSubmitting && (<p>{'Tentando salvar...'}</p>)
+        isSubmitting && (<p>{'Trying to save...'}</p>)
       }
     </form>
   );
